@@ -16,6 +16,10 @@ library(tidyverse)
     ## x dplyr::filter() masks stats::filter()
     ## x dplyr::lag()    masks stats::lag()
 
+``` r
+library(ggridges)
+```
+
 Load in a dataset that we’ll use often.
 
 ``` r
@@ -165,3 +169,68 @@ weather_df %>%
     ## Warning: Removed 15 rows containing non-finite values (stat_bin2d).
 
 ![](viz_part1_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+
+## Univariate plots
+
+``` r
+weather_df %>% 
+  ggplot(aes(x = tmax, fill = name)) +
+  geom_histogram() + 
+  facet_grid(. ~ name)
+```
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 3 rows containing non-finite values (stat_bin).
+
+![](viz_part1_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
+
+Let’s try some other plots…
+
+``` r
+weather_df %>% 
+  ggplot(aes(x = tmax, fill = name)) + 
+  geom_density(alpha = .3)
+```
+
+    ## Warning: Removed 3 rows containing non-finite values (stat_density).
+
+![](viz_part1_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
+
+Still with `tmax` and `name`
+
+``` r
+weather_df %>% 
+  ggplot(aes(x = name, y = tmax)) + 
+  geom_boxplot()
+```
+
+    ## Warning: Removed 3 rows containing non-finite values (stat_boxplot).
+
+![](viz_part1_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
+
+Some people like violin plots????
+
+``` r
+weather_df %>% 
+  ggplot(aes(x = name, y = tmax)) + 
+  geom_boxplot()
+```
+
+    ## Warning: Removed 3 rows containing non-finite values (stat_boxplot).
+
+![](viz_part1_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
+
+What about ridges …
+
+``` r
+weather_df %>% 
+  ggplot(aes(x = tmax, y = name)) + 
+  geom_density_ridges(alpha = .8, scale = .8)
+```
+
+    ## Picking joint bandwidth of 1.84
+
+    ## Warning: Removed 3 rows containing non-finite values (stat_density_ridges).
+
+![](viz_part1_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
