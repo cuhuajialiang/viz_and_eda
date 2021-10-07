@@ -17,6 +17,7 @@ library(tidyverse)
     ## x dplyr::lag()    masks stats::lag()
 
 ``` r
+library(patchwork)
 library(viridis)
 ```
 
@@ -183,3 +184,98 @@ waikiki %>%
     ## Warning: Removed 3 rows containing missing values (geom_point).
 
 <img src="viz_part2_files/figure-gfm/unnamed-chunk-7-1.png" width="90%" />
+
+## `patchwork`
+
+``` r
+ggp_tmax_tmin =
+  weather_df %>% 
+  ggplot(aes(x = tmin, y = tmax, color = name)) + 
+  geom_point(alpha = .3) + 
+  theme(legend.position = "none")
+
+ggp_prcp_dens = 
+  weather_df %>% 
+  filter(prcp > 0) %>% 
+  ggplot(aes(x = prcp, fill = name)) + 
+  geom_density(alpha = .3) + 
+  theme(legend.position = "none")
+
+ggp_tmax_date = 
+  weather_df %>% 
+  ggplot(aes(x = date, y = tmax, color = name)) + 
+  geom_point() +
+  geom_smooth() + 
+  theme(legend.position = "bottom")
+
+(ggp_tmax_tmin + ggp_prcp_dens) / ggp_tmax_date
+```
+
+    ## Warning: Removed 15 rows containing missing values (geom_point).
+
+    ## `geom_smooth()` using method = 'loess' and formula 'y ~ x'
+
+    ## Warning: Removed 3 rows containing non-finite values (stat_smooth).
+
+    ## Warning: Removed 3 rows containing missing values (geom_point).
+
+<img src="viz_part2_files/figure-gfm/unnamed-chunk-8-1.png" width="90%" />
+
+## data manipulation
+
+quick example on factors
+
+``` r
+weather_df %>% 
+  mutate(
+    name = fct_reorder(name, tmax)
+  ) %>% 
+  ggplot(aes(x = name, y = tmax)) + 
+  geom_boxplot()
+```
+
+    ## Warning: Removed 3 rows containing non-finite values (stat_boxplot).
+
+<img src="viz_part2_files/figure-gfm/unnamed-chunk-9-1.png" width="90%" />
+
+What about tmax and tmin …
+
+``` r
+weather_df %>% 
+  pivot_longer(
+    tmax:tmin,
+    names_to = "obs", 
+    values_to = "temperature"
+  ) %>% 
+  ggplot(aes(x = temperature, fill = obs)) + 
+  geom_density(alpha = .3) + 
+  facet_grid(. ~ name)
+```
+
+    ## Warning: Removed 18 rows containing non-finite values (stat_density).
+
+<img src="viz_part2_files/figure-gfm/unnamed-chunk-10-1.png" width="90%" />
+
+``` r
+pulse_df = 
+  haven::read_sas("data/public_pulse_data.sas7bdat") %>% 
+  janitor::clean_names() %>% 
+  pivot_longer(
+    bdi_score_bl:bdi_score_12m,
+    names_to = "visit",
+    values_to = "bdi",
+    names_prefix = "bdi_score_"
+  ) %>% 
+  mutate(visit = recode(visit, "bl" = "00m"))
+
+pulse_df %>% 
+  ggplot(aes(x = visit, y = bdi)) + 
+  geom_point(size = .2) + 
+  geom_line(aes(group = id))
+```
+
+    ## Warning: Removed 879 rows containing missing values (geom_point).
+
+    ## Warning: Removed 515 row(s) containing missing values (geom_path).
+
+<img src="viz_part2_files/figure-gfm/unnamed-chunk-11-1.png" width="90%" />
