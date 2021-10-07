@@ -161,3 +161,25 @@ weather_df %>%
     ## Warning: Removed 15 rows containing missing values (geom_point).
 
 <img src="viz_part2_files/figure-gfm/unnamed-chunk-6-1.png" width="90%" />
+
+## `data` in geoms
+
+``` r
+central_park = 
+  weather_df %>% 
+  filter(name == "CentralPark_NY")
+
+waikiki = 
+  weather_df %>% 
+  filter(name == "Waikiki_HA")
+
+
+waikiki %>% 
+  ggplot(aes(x = date, y = tmax, color = name)) + 
+  geom_point() + 
+  geom_line(data = central_park)
+```
+
+    ## Warning: Removed 3 rows containing missing values (geom_point).
+
+<img src="viz_part2_files/figure-gfm/unnamed-chunk-7-1.png" width="90%" />
