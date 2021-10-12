@@ -35,3 +35,75 @@ weather_df =
     month = lubridate::floor_date(date, unit = "month")) %>%
   select(name, id, everything())
 ```
+
+
+## `group_by`
+
+```{r}
+weather_df %>% 
+  group_by(name, month)
+```
+
+
+## count some things
+
+```{r}
+weather_df %>% 
+  group_by(name, month) %>% 
+  summarize(n_obs = n())
+
+weather_df %>% 
+  count(name)
+```
+
+It's nice that summarize produces a data frame
+
+`table` doesnt', and that's bad.
+
+```{r}
+weather_df %>% 
+  pull(name) %>% 
+  table() 
+```
+
+```{r}
+weather_df %>% 
+  janitor::tabyl(month, name)
+```
+
+
+
+## More general summaries
+
+Let's count, take means, look at SDs ...
+
+
+```{r}
+weather_df %>% 
+  group_by(name, month) %>% 
+  summarize(
+    n_obs = n(),
+    mean_tmax = mean(tmax, na.rm = TRUE),
+    median_tmax = median(tmax, na.rm = TRUE),
+    sd_tmax = sd(tmax, na.rm = TRUE)
+  ) %>% 
+  ggplot(aes(x = month, y = mean_tmax, color = name)) + 
+  geom_point() + 
+  geom_line()
+```
+
+Formatting table outputs.
+
+```{r}
+weather_df %>% 
+  group_by(name) %>% 
+  summarize(
+    n_obs = n(),
+    mean_tmax = mean(tmax, na.rm = TRUE)
+  ) %>% 
+  knitr::kable(digits = 2)
+```
+
+
+
+
