@@ -200,3 +200,77 @@ weather_df %>%
 | CentralPark\_NY |    365 |      17.37 |
 | Waikiki\_HA     |    365 |      29.66 |
 | Waterhole\_WA   |    365 |       7.48 |
+
+## grouped `mutate`
+
+``` r
+weather_df %>% 
+  group_by(name) %>% 
+  mutate(
+    mean_tmax = mean(tmax, na.rm = TRUE),
+    centered_tmax = tmax - mean_tmax
+  ) %>% 
+  ggplot(aes(x = date, y = centered_tmax, color = name)) + 
+  geom_point()
+```
+
+    ## Warning: Removed 3 rows containing missing values (geom_point).
+
+<img src="eda_files/figure-gfm/unnamed-chunk-9-1.png" width="90%" />
+
+``` r
+weather_df %>% 
+  group_by(name) %>% 
+  mutate(
+    tmax_rank = min_rank(desc(tmax))
+  ) %>% 
+  filter(tmax_rank < 2)
+```
+
+    ## # A tibble: 4 × 8
+    ## # Groups:   name [3]
+    ##   name           id          date        prcp  tmax  tmin month      tmax_rank
+    ##   <chr>          <chr>       <date>     <dbl> <dbl> <dbl> <date>         <int>
+    ## 1 CentralPark_NY USW00094728 2017-06-13     0  34.4  25   2017-06-01         1
+    ## 2 CentralPark_NY USW00094728 2017-07-20     3  34.4  25   2017-07-01         1
+    ## 3 Waikiki_HA     USC00519397 2017-07-12     0  33.3  24.4 2017-07-01         1
+    ## 4 Waterhole_WA   USS0023B17S 2017-08-03     0  26.4  13.3 2017-08-01         1
+
+Lagged variables
+
+``` r
+weather_df %>% 
+  group_by(name) %>% 
+  mutate(
+    lagged_tmax = lag(tmax, n = 1),
+    tmax_diff = tmax - lagged_tmax
+  ) %>% 
+  summarize(diff_sd = sd(tmax_diff, na.rm = TRUE))
+```
+
+    ## # A tibble: 3 × 2
+    ##   name           diff_sd
+    ##   <chr>            <dbl>
+    ## 1 CentralPark_NY    4.45
+    ## 2 Waikiki_HA        1.23
+    ## 3 Waterhole_WA      3.13
+
+## Limitations
+
+What if my “summary” is a linear model …
+
+Well … that doesn’t work.
+
+``` r
+weather_df %>% 
+  group_by(name) %>% 
+  summarize(cor_tmin_tmax = cor(tmin, tmax, use = "complete"))
+
+weather_df %>% 
+  filter(name == "CentralPark_NY") %>% 
+  lm(tmax ~ tmin, data = .)
+
+weather_df %>% 
+  group_by(name) %>% 
+  summarize(lm = lm(tmax ~ tmin))
+```
